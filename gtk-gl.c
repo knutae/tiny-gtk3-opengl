@@ -4,7 +4,7 @@
 #include <gtk/gtk.h>
 
 const char * VERTEX_SHADER =
-    "#version 150\n"
+    "#version 450\n"
     "out vec2 uv;"
     "in vec2 aVertexPosition;"
     "void main() {"
@@ -13,7 +13,7 @@ const char * VERTEX_SHADER =
     "}";
 
 const char * FRAGMENT_SHADER =
-    "#version 150\n"
+    "#version 450\n"
     "out vec4 fragcolor;"
     "in vec2 uv;"
     "void main() {"
