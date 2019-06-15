@@ -6,7 +6,7 @@
 const char * VERTEX_SHADER =
     "#version 450\n"
     "out vec2 uv;"
-    "in vec2 aVertexPosition;"
+    "layout (location=0) in vec2 aVertexPosition;"
     "void main() {"
     "    uv = aVertexPosition;"
     "    gl_Position = vec4(aVertexPosition, 0, 1);"
@@ -73,9 +73,8 @@ void realize(GtkGLArea *glarea) {
     glBindBuffer(GL_ARRAY_BUFFER, screen_quad_vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    GLuint vertexPosAttrib = glGetAttribLocation(program, "aVertexPosition");
-    glVertexAttribPointer(vertexPosAttrib, 2, GL_FLOAT, false, 0, NULL);
-    glEnableVertexAttribArray(vertexPosAttrib);
+    glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, NULL);
+    glEnableVertexAttribArray(0);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
