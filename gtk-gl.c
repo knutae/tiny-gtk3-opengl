@@ -5,16 +5,19 @@
 
 const char * VERTEX_SHADER =
     "#version 150\n"
+    "out vec2 uv;"
     "in vec2 aVertexPosition;"
     "void main() {"
+    "    uv = aVertexPosition;"
     "    gl_Position = vec4(aVertexPosition, 0, 1);"
     "}";
 
 const char * FRAGMENT_SHADER =
     "#version 150\n"
     "out vec4 fragcolor;"
+    "in vec2 uv;"
     "void main() {"
-    "    fragcolor = vec4(0.4, 0.6, 0.4, 1.0);"
+    "    fragcolor = vec4(abs(sin(uv.x)), abs(sin(uv.y)), abs(sin(uv.x-uv.y)), 1.0);"
     "}";
 
 GLuint compile_shader(GLenum type, const char* source) {
