@@ -3,13 +3,23 @@
 #include <GLES3/gl32.h>
 #include <gtk/gtk.h>
 
-const char * VERTEX_SHADER =
+const char * VERTEX_SHADER = "void main() {}";
+
+const char * GEOMETRY_SHADER =
     "#version 450\n"
+    "layout(points) in;"
+    "layout(triangle_strip, max_vertices = 4) out;"
     "out vec2 uv;"
-    "layout (location=0) in vec2 aVertexPosition;"
+    "void emit(float u, float v) {"
+    "    uv = vec2(u, v);"
+    "    gl_Position = vec4(uv, 0.0, 1.0);"
+    "    EmitVertex();"
+    "}"
     "void main() {"
-    "    uv = aVertexPosition;"
-    "    gl_Position = vec4(aVertexPosition, 0, 1);"
+    "    emit(-1.0, -1.0);"
+    "    emit( 1.0, -1.0);"
+    "    emit(-1.0,  1.0);"
+    "    emit( 1.0,  1.0);"
     "}";
 
 const char * FRAGMENT_SHADER =
@@ -47,9 +57,11 @@ GLuint compile_shader(GLenum type, const char* source) {
 void realize(GtkGLArea *glarea) {
     gtk_gl_area_make_current(glarea);
     GLuint vertex_shader = compile_shader(GL_VERTEX_SHADER, VERTEX_SHADER);
+    GLuint geometry_shader = compile_shader(GL_GEOMETRY_SHADER, GEOMETRY_SHADER);
     GLuint fragment_shader = compile_shader(GL_FRAGMENT_SHADER, FRAGMENT_SHADER);
     GLuint program = glCreateProgram();
     glAttachShader(program, vertex_shader);
+    glAttachShader(program, geometry_shader);
     glAttachShader(program, fragment_shader);
     glLinkProgram(program);
     GLint success;
@@ -66,23 +78,9 @@ void realize(GtkGLArea *glarea) {
     glDeleteShader(fragment_shader);
     glUseProgram(program);
 
-    GLuint screen_quad_vbo;
     GLuint screen_quad_vba;
-    glGenBuffers(1, &screen_quad_vbo);
     glGenVertexArrays(1, &screen_quad_vba);
     glBindVertexArray(screen_quad_vba);
-
-    float vertices[] = {
-        -1, -1,
-         1, -1,
-        -1,  1,
-         1,  1,
-    };
-    glBindBuffer(GL_ARRAY_BUFFER, screen_quad_vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, NULL);
-    glEnableVertexAttribArray(0);
 
     GdkWindow * gdk_window = gtk_widget_get_window(GTK_WIDGET(glarea));
     frame_clock = gdk_window_get_frame_clock(gdk_window);
@@ -94,7 +92,7 @@ void realize(GtkGLArea *glarea) {
 void render(GtkGLArea *glarea, GdkGLContext *context) {
     double time = (gdk_frame_clock_get_frame_time(frame_clock) - start_time) / 1000000.0;
     glUniform1f(0, time);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glDrawArrays(GL_POINTS, 0, 1);
 }
 
 int main(int argc, char** argv) {
