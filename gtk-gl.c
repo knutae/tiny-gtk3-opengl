@@ -16,9 +16,17 @@ const char * FRAGMENT_SHADER =
     "#version 450\n"
     "out vec4 fragcolor;"
     "in vec2 uv;"
+    "layout (location=0) uniform float uTime;"
     "void main() {"
-    "    fragcolor = vec4(abs(sin(uv.x)), abs(sin(uv.y)), abs(sin(uv.x-uv.y)), 1.0);"
+    "    fragcolor = vec4("
+    "        abs(sin(uv.x + uTime * 0.123)),"
+    "        abs(sin(uv.y - uTime * 0.321)),"
+    "        abs(sin(uv.x-uv.y + uTime * 0.012)),"
+    "        1.0);"
     "}";
+
+static GdkFrameClock * frame_clock;
+static gint64 start_time;
 
 GLuint compile_shader(GLenum type, const char* source) {
     GLuint shader = glCreateShader(type);
@@ -75,10 +83,17 @@ void realize(GtkGLArea *glarea) {
 
     glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, NULL);
     glEnableVertexAttribArray(0);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+    GdkWindow * gdk_window = gtk_widget_get_window(GTK_WIDGET(glarea));
+    frame_clock = gdk_window_get_frame_clock(gdk_window);
+    start_time = gdk_frame_clock_get_frame_time(frame_clock);
+    g_signal_connect_swapped(frame_clock, "update", G_CALLBACK(gtk_gl_area_queue_render), glarea);
+    gdk_frame_clock_begin_updating(frame_clock);
 }
 
 void render(GtkGLArea *glarea, GdkGLContext *context) {
+    double time = (gdk_frame_clock_get_frame_time(frame_clock) - start_time) / 1000000.0;
+    glUniform1f(0, time);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
