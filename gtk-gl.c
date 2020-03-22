@@ -1,4 +1,3 @@
-#include <stdbool.h>
 #include <stdio.h>
 #include <GLES3/gl32.h>
 #include <gtk/gtk.h>
