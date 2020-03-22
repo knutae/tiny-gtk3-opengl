@@ -76,6 +76,7 @@ void realize(GtkGLArea *glarea) {
     }
     glDeleteShader(vertex_shader);
     glDeleteShader(fragment_shader);
+    glDeleteShader(geometry_shader);
     glUseProgram(program);
 
     GLuint screen_quad_vba;
